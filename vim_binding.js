@@ -68,7 +68,18 @@ define([
     var cm_config = Cell.options_default.cm_config;
     cm_config.keyMap = 'vim';
     cm_config.extraKeys = $.extend(cm_config.extraKeys || {}, {
-      'Esc': CodeMirror.prototype.leaveInsertMode,
+        'Esc': function(cm) {
+            var current_cell = ns.notebook.get_selected_cell();
+            if (current_cell && current_cell.code_mirror) {
+                if (current_cell.code_mirror.state.vim.insertMode) {
+                    return CodeMirror.prototype.leaveInsertMode(cm);
+                } else if (current_cell.code_mirror.state.vim.visualMode) {
+                    // Hack
+                    return CodeMirror.prototype.leaveInsertMode(cm);
+                }
+            }
+            return CodeMirror.prototype.leaveNormalMode(cm);
+        },
       'Shift-Esc': CodeMirror.prototype.leaveNormalMode,
       'Ctrl-C': false,  // To enable clipboard copy
     });
